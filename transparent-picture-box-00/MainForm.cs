@@ -31,63 +31,60 @@ namespace transparent_picture_box_00
             #endregion G L Y P H
 
             BackgroundImageLayout = ImageLayout.Stretch;
-
+            makePlanes();
             _ = execFlyPlanes();
         }
 
-        private async Task execFlyPlanes()
+        private void makePlanes()
         {
-            const int DIM = 60;
-            for (int i = 0; i < 5; i++)
+            makePlane(glyph: "\uE800", Color.Blue, rotateFlip: RotateFlipType.RotateNoneFlipNone);
+            makePlane(glyph: "\uE801", Color.Green, rotateFlip: RotateFlipType.RotateNoneFlipNone);
+            makePlane(glyph: "\uE802", Color.DarkGoldenrod, rotateFlip: RotateFlipType.RotateNoneFlipX);
+            makePlane(glyph: "\uE803", Color.Gray, rotateFlip: RotateFlipType.RotateNoneFlipNone);
+            makePlane(glyph: "\uE804", Color.Salmon, rotateFlip: RotateFlipType.RotateNoneFlipX);
+        }
+
+        const int DIM = 60;
+        int _planeId = 0;
+        private void makePlane(string glyph, Color color, RotateFlipType rotateFlip)
+        {
+            Bitmap image = new Bitmap(DIM, DIM);
+            using (Graphics graphics = Graphics.FromImage(image))
+            using (SolidBrush brush = new SolidBrush(color))
             {
-                string glyph;
-                Color color;
-                switch (i)
+                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                graphics.DrawString(glyph, Glyphs, brush, new PointF());
+            }
+            image.RotateFlip(rotateFlip);
+
+            Region rgn = new Region();
+            rgn.Union(new Rectangle(0, 0, image.Width, image.Height));
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
                 {
-                    case 0: glyph = "\uE800"; color = Color.Blue; break;
-                    case 1: glyph = "\uE801"; color = Color.Green; break;
-                    case 2: glyph = "\uE802"; color = Color.DarkGoldenrod; break;
-                    case 3: glyph = "\uE803"; color = Color.Gray; break;
-                    case 4: glyph = "\uE804"; color = Color.Salmon; break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                Bitmap image = new Bitmap(DIM, DIM);
-                using (Graphics graphics = Graphics.FromImage(image))
-                using (SolidBrush brush = new SolidBrush(color))
-                {
-                    graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    graphics.DrawString(glyph, Glyphs, brush, new PointF());
-                }
-                switch (i)
-                {
-                    case 4:
-                    case 2: image.RotateFlip(RotateFlipType.RotateNoneFlipX); break;
-                }
-                Region rgn = new Region();
-                rgn.Union(new Rectangle(0, 0, image.Width, image.Height));
-                for (int x = 0; x < image.Width; x++)
-                {
-                    for (int y = 0; y < image.Height; y++)
+                    if (image.GetPixel(x, y).A == 0)
                     {
-                        if (image.GetPixel(x, y).A == 0)
-                        {
-                            rgn.Exclude(new Rectangle(x, y, 1, 1));
-                        }
+                        rgn.Exclude(new Rectangle(x, y, 1, 1));
                     }
                 }
-                var plane = new PictureBox
-                {
-                    Name = $"plane{i}",
-                    Size = new Size(DIM, DIM),
-                    BorderStyle = BorderStyle.FixedSingle,
-                    Location = new Point(_rando.Next(Width), _rando.Next(Height)),
-                    BackColor = Color.Transparent,
-                    BackgroundImage = image,
-                };
-                plane.Region = rgn;
-                Controls.Add(plane);
             }
+            var plane = new PictureBox
+            {
+                Name = $"plane{_planeId++}",
+                Size = new Size(DIM, DIM),
+                BorderStyle = BorderStyle.FixedSingle,
+                Location = new Point(_rando.Next(Width), _rando.Next(Height)),
+                BackColor = Color.Transparent,
+                BackgroundImage = image,
+            };
+            plane.Region = rgn;
+            Controls.Add(plane);
+        }
+        Random _rando = new Random(1);
+
+        private async Task execFlyPlanes()
+        {
             while(true)
             {
                 _count++;
@@ -122,7 +119,6 @@ namespace transparent_picture_box_00
                 }
             }
         }
-        Random _rando = new Random(1);
         int _count = 0;
         public static Font Glyphs { get; private set; }
         PrivateFontCollection privateFontCollection = new PrivateFontCollection();
