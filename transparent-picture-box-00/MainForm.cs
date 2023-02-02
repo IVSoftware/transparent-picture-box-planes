@@ -90,6 +90,14 @@ namespace transparent_picture_box_00
             }
             while(true)
             {
+                _count++;
+                // Screenshots
+                switch (_count)
+                {
+                    // case 190: await new SemaphoreSlim(0).WaitAsync(); break;
+                    // case 400: await new SemaphoreSlim(0).WaitAsync(); break;
+                    case 465: await new SemaphoreSlim(0).WaitAsync(); break;
+                }
                 for (int i = 0; i < 5; i++)
                 {
                     try
@@ -115,6 +123,7 @@ namespace transparent_picture_box_00
             }
         }
         Random _rando = new Random(1);
+        int _count = 0;
         public static Font Glyphs { get; private set; }
         PrivateFontCollection privateFontCollection = new PrivateFontCollection();
     }
@@ -138,11 +147,6 @@ namespace transparent_picture_box_00
             if (point.Y < 0) point.Y = canvas.Height;
             else if (point.Y >= canvas.Height) point.Y = 0;
             return point;
-        }
-        public static Rectangle InflateInline (this Rectangle rectangle, int width, int height)
-        {
-            rectangle.Inflate(width, height);
-            return rectangle;
         }
     }
 }
