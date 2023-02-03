@@ -151,5 +151,4 @@ Get the next location for plane based on the vector and ensure that the new loca
         }
     }
 
-
   [1]: https://i.stack.imgur.com/j23sV.png
