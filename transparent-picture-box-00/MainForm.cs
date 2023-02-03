@@ -47,28 +47,7 @@ namespace transparent_picture_box_00
         const int DIM = 60;
         int _planeId = 0;
         private void makePlane(string glyph, Color color, RotateFlipType rotateFlip)
-        {
-            Bitmap image = new Bitmap(DIM, DIM);
-            using (Graphics graphics = Graphics.FromImage(image))
-            using (SolidBrush brush = new SolidBrush(color))
-            {
-                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                graphics.DrawString(glyph, Glyphs, brush, new PointF());
-            }
-            image.RotateFlip(rotateFlip);
-
-            Region rgn = new Region();
-            rgn.Union(new Rectangle(0, 0, image.Width, image.Height));
-            for (int x = 0; x < image.Width; x++)
-            {
-                for (int y = 0; y < image.Height; y++)
-                {
-                    if (image.GetPixel(x, y).A == 0)
-                    {
-                        rgn.Exclude(new Rectangle(x, y, 1, 1));
-                    }
-                }
-            }
+        {            
             var plane = new PictureBox
             {
                 Name = $"plane{_planeId++}",
@@ -76,9 +55,26 @@ namespace transparent_picture_box_00
                 BorderStyle = BorderStyle.FixedSingle,
                 Location = new Point(_rando.Next(Width), _rando.Next(Height)),
                 BackColor = Color.Transparent,
-                BackgroundImage = image,
+                Region = new Region(new Rectangle(0, 0, DIM, DIM)),
+                Image = new Bitmap(DIM, DIM)
             };
-            plane.Region = rgn;
+
+            using (Graphics graphics = Graphics.FromImage(plane.Image))
+            using (SolidBrush brush = new SolidBrush(color))
+            {
+                graphics.Clear(Color.Transparent);
+                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                graphics.DrawString(glyph, Glyphs, brush, new PointF());
+            }
+            plane.Image.RotateFlip(rotateFlip);
+
+            for (int x = 0; x < DIM; x++) for (int y = 0; y < DIM; y++)
+            {
+                if (((Bitmap)plane.Image).GetPixel(x, y).A == 0)
+                {
+                    plane.Region.Exclude(new Rectangle(x, y, 1, 1));
+                }
+            }
             Controls.Add(plane);
         }
         Random _rando = new Random(1);
@@ -93,7 +89,7 @@ namespace transparent_picture_box_00
                 {
                     // case 190: await new SemaphoreSlim(0).WaitAsync(); break;
                     // case 400: await new SemaphoreSlim(0).WaitAsync(); break;
-                    case 465: await new SemaphoreSlim(0).WaitAsync(); break;
+                    // case 465: await new SemaphoreSlim(0).WaitAsync(); break;
                 }
                 for (int i = 0; i < 5; i++)
                 {
